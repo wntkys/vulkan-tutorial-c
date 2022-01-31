@@ -19,7 +19,7 @@ typedef struct {
     const char *title;
     const char *applicationName;
     const char *engineName;
-} AppWindowProperties;
+} AppProperties;
 
 typedef struct {
     bool isSet;

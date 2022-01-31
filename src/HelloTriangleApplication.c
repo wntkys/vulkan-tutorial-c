@@ -1,7 +1,7 @@
 #include "HelloTriangleApplication.h"
 
 GLFWwindow *HTA_window;
-AppWindowProperties HTA_props = { 400, 400, "App Window", "Hello Triangle", "Test Engine" };
+AppProperties HTA_props = { 400, 400, "App Window", "Hello Triangle", "Test Engine" };
 VkInstance HTA_vkInstance;
 VkPhysicalDevice HTA_vkPhysicalDevice = VK_NULL_HANDLE;
 VkDevice HTA_vkDevice;
