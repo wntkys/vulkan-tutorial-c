@@ -71,8 +71,8 @@ bool HTA_IsDeviceSuitable( VkPhysicalDevice device ) {
     isSupported = (
         deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU &&
         deviceFeatures.geometryShader &&
-        indices.error == false &&
-        indices.graphicsFamily.isSet == true
+        !indices.error &&
+        indices.graphicsFamily.isSet
     );
 
     printf( 
