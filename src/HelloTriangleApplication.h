@@ -39,15 +39,14 @@ void HTA_InitWindow( void );
 void HTA_MainLoop( void );
 void HTA_Cleanup( void );
 
-void HTA_ClearFeatures( VkPhysicalDeviceFeatures* );
-
-bool HTA_IsDeviceSuitable( VkPhysicalDevice );
-
 VkResult HTA_InitVulkan( void );
 VkResult HTA_CreateVulkanInstance( void );
 VkResult HTA_PickPhysicalDevice( void );
 VkResult HTA_CreateLogicalDevice( void );
 
+void HTA_ClearFeatures( VkPhysicalDeviceFeatures* );
+void HTA_GetDriverVersion( char*, uint32_t, uint32_t );
+bool HTA_IsDeviceSuitable( VkPhysicalDevice );
 QueueFamilyIndices HTA_FindQueueFamilies( VkPhysicalDevice );
 
 #endif

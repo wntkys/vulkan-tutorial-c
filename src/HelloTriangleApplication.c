@@ -50,47 +50,6 @@ void HTA_Cleanup() {
     glfwTerminate();
 }
 
-void HTA_ClearFeatures( VkPhysicalDeviceFeatures *pFeatures ) {
-    int length = sizeof( VkPhysicalDeviceFeatures ) / sizeof( VkBool32 );
-    VkBool32 *p = ( VkBool32* )pFeatures;
-    for ( int i = 0; i < length; i++, p++ ) *p = 0;
-}
-
-bool HTA_IsDeviceSuitable( VkPhysicalDevice device ) {
-    debug_method( "HTA_IsDeviceSuitable" );
-
-    bool isSupported = false;
-
-    QueueFamilyIndices indices = HTA_FindQueueFamilies( device );
-
-    VkPhysicalDeviceProperties deviceProperties;
-    VkPhysicalDeviceFeatures deviceFeatures;
-    vkGetPhysicalDeviceProperties( device, &deviceProperties );
-    vkGetPhysicalDeviceFeatures( device, &deviceFeatures );
-
-    isSupported = (
-        deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU &&
-        deviceFeatures.geometryShader &&
-        !indices.error &&
-        indices.graphicsFamily.isSet
-    );
-
-    printf( 
-        "%s\n"
-        "\t%s (Device ID: %u) (Driver version: %u)\n"
-        "\tDiscrete: %s\n"
-        "\tGeometry Shader support: %s\n",
-        isSupported ? "[ OK ]" : "[ ERROR ]",
-        deviceProperties.deviceName,
-        deviceProperties.deviceID,
-        deviceProperties.driverVersion,
-        deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU ? "Yes" : "No",
-        deviceFeatures.geometryShader ? "Yes" : "No"
-    );
-
-    return isSupported;
-}
-
 VkResult HTA_InitVulkan() {
     debug_entry( "HTA_InitVulkan" );
 
@@ -224,6 +183,79 @@ VkResult HTA_CreateLogicalDevice() {
     vkGetDeviceQueue( HTA_vkDevice, indices.graphicsFamily.value, 0, &HTA_graphicsQueue );
 
     return VK_SUCCESS;
+}
+
+void HTA_ClearFeatures( VkPhysicalDeviceFeatures *pFeatures ) {
+    int length = sizeof( VkPhysicalDeviceFeatures ) / sizeof( VkBool32 );
+    VkBool32 *p = ( VkBool32* )pFeatures;
+    for ( int i = 0; i < length; i++, p++ ) *p = 0;
+}
+
+void HTA_GetDriverVersion( char *output_str, uint32_t vendor_id, uint32_t driver_version ) {
+    // NVIDIA version conventions
+    if ( vendor_id == 0x10DE ) {
+        sprintf( output_str, "%d.%d.%d.%d",
+            ( driver_version >> 22 ) & 0x03FF,
+            ( driver_version >> 14 ) & 0x00FF,
+            ( driver_version >> 6  ) & 0x00FF,
+            ( driver_version >> 0  ) & 0x003F
+		);
+        return;
+    }
+
+    // Intel version conventions
+    if ( vendor_id == 0x8086 ) {
+        sprintf( output_str, "%d.%d",
+            ( driver_version >> 14 ),
+            ( driver_version >> 0  ) & 0x3FFF
+        );
+        return;
+    }
+
+    // Vulkan version conventions
+    sprintf( output_str, "%d.%d.%d",
+        ( driver_version >> 22 ),
+        ( driver_version >> 12 ) & 0x03FF,
+        ( driver_version >> 0  ) & 0x0FFF
+    );
+}
+
+bool HTA_IsDeviceSuitable( VkPhysicalDevice device ) {
+    debug_method( "HTA_IsDeviceSuitable" );
+
+    bool isSupported = false;
+
+    QueueFamilyIndices indices = HTA_FindQueueFamilies( device );
+
+    VkPhysicalDeviceProperties deviceProperties;
+    VkPhysicalDeviceFeatures deviceFeatures;
+    vkGetPhysicalDeviceProperties( device, &deviceProperties );
+    vkGetPhysicalDeviceFeatures( device, &deviceFeatures );
+
+    isSupported = (
+        deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU &&
+        deviceFeatures.geometryShader &&
+        !indices.error &&
+        indices.graphicsFamily.isSet
+    );
+
+    char driverVersion[ 64 ];
+    HTA_GetDriverVersion( driverVersion, deviceProperties.vendorID, deviceProperties.driverVersion );
+
+    printf( 
+        "%s\n"
+        "\t%s (Device ID: %u) (Driver version: %s)\n"
+        "\tDiscrete: %s\n"
+        "\tGeometry Shader support: %s\n",
+        isSupported ? "[ OK ]" : "[ ERROR ]",
+        deviceProperties.deviceName,
+        deviceProperties.deviceID,
+        driverVersion,
+        deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU ? "Yes" : "No",
+        deviceFeatures.geometryShader ? "Yes" : "No"
+    );
+
+    return isSupported;
 }
 
 QueueFamilyIndices HTA_FindQueueFamilies( VkPhysicalDevice device ) {
