@@ -39,6 +39,8 @@ void HTA_InitWindow( void );
 void HTA_MainLoop( void );
 void HTA_Cleanup( void );
 
+void HTA_ClearFeatures( VkPhysicalDeviceFeatures* );
+
 bool HTA_IsDeviceSuitable( VkPhysicalDevice );
 
 VkResult HTA_InitVulkan( void );
