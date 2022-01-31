@@ -242,14 +242,12 @@ QueueFamilyIndices HTA_FindQueueFamilies( VkPhysicalDevice device ) {
     VkQueueFamilyProperties queueFamilyProperties[ queueFamilyCount ];
     vkGetPhysicalDeviceQueueFamilyProperties( device, &queueFamilyCount, queueFamilyProperties );
 
-    for ( int i = queueFamilyCount - 1; i >= 0; i-- ) {
-        VkQueueFamilyProperties p = queueFamilyProperties[ i ];
-        if ( p.queueFlags & VK_QUEUE_GRAPHICS_BIT ) {
-            indices.error = false;
-            indices.graphicsFamily.isSet = true;
-            indices.graphicsFamily.value = i;
-            break;
-        }
+    for ( int i = 0; i < queueFamilyCount; i++ ) {
+        if ( !queueFamilyProperties[ i ].queueFlags & VK_QUEUE_GRAPHICS_BIT ) continue;
+
+        indices.error = false;
+        indices.graphicsFamily.isSet = true;
+        indices.graphicsFamily.value = i;
     }
 
     return indices;
