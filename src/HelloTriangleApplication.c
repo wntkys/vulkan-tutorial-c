@@ -1,15 +1,20 @@
 #include "HelloTriangleApplication.h"
 
-GLFWwindow *HTA_window;
-AppProperties HTA_props = { 400, 400, "App Window", "Hello Triangle", "Test Engine" };
-VkInstance HTA_vkInstance;
-VkPhysicalDevice HTA_vkPhysicalDevice = VK_NULL_HANDLE;
-VkDevice HTA_vkDevice;
-VkQueue HTA_graphicsQueue;
+struct {
+    GLFWwindow *window;
+    AppProperties props;
+    VkInstance vkInstance;
+    VkPhysicalDevice vkPhysicalDevice;
+    VkDevice vkDevice;
+    VkQueue graphicsQueue;
+    VkSurfaceKHR vkSurface;
+} HTA;
 
-void HTA_Run( void ) {
+
+
+void HTA_Run( AppProperties props ) {
     debug_entry( "HTA_Run" );
-
+    HTA.props = props;
     HTA_InitWindow();
 
     VkResult result = HTA_InitVulkan();
@@ -30,13 +35,13 @@ void HTA_InitWindow() {
     glfwWindowHint( GLFW_CLIENT_API, GLFW_NO_API );
     glfwWindowHint( GLFW_RESIZABLE, GLFW_FALSE );
 
-    HTA_window = glfwCreateWindow( HTA_props.width, HTA_props.height, HTA_props.title, NULL, NULL );
+    HTA.window = glfwCreateWindow( HTA.props.width, HTA.props.height, HTA.props.title, NULL, NULL );
 }
 
 void HTA_MainLoop() {
     debug_entry( "HTA_MainLoop" );
 
-    while ( !glfwWindowShouldClose( HTA_window ) ) {
+    while ( !glfwWindowShouldClose( HTA.window ) ) {
         glfwPollEvents();
     }
 }
@@ -44,9 +49,9 @@ void HTA_MainLoop() {
 void HTA_Cleanup() {
     debug_entry( "HTA_Cleanup" );
 
-    vkDestroyDevice( HTA_vkDevice, NULL );
-    vkDestroyInstance( HTA_vkInstance, NULL );
-    glfwDestroyWindow( HTA_window );
+    vkDestroyDevice( HTA.vkDevice, NULL );
+    vkDestroyInstance( HTA.vkInstance, NULL );
+    glfwDestroyWindow( HTA.window );
     glfwTerminate();
 }
 
@@ -80,9 +85,9 @@ VkResult HTA_CreateVulkanInstance() {
     VkApplicationInfo appInfo = {
         .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
         .pNext = NULL,
-        .pApplicationName = HTA_props.applicationName,
+        .pApplicationName = HTA.props.applicationName,
         .applicationVersion = VK_MAKE_VERSION( 1, 0, 0 ),
-        .pEngineName = HTA_props.engineName,
+        .pEngineName = HTA.props.engineName,
         .engineVersion = VK_MAKE_VERSION( 1, 0, 0 ),
         .apiVersion = VK_API_VERSION_1_0
     };
@@ -116,27 +121,27 @@ VkResult HTA_CreateVulkanInstance() {
         );
     }
 
-    return vkCreateInstance( &createInfo, NULL, &HTA_vkInstance );
+    return vkCreateInstance( &createInfo, NULL, &HTA.vkInstance );
 }
 
 VkResult HTA_PickPhysicalDevice() {
     debug_entry( "HTA_PickPhysicalDevice" );
 
     uint32_t deviceCount = 0;
-    vkEnumeratePhysicalDevices( HTA_vkInstance, &deviceCount, NULL );
+    vkEnumeratePhysicalDevices( HTA.vkInstance, &deviceCount, NULL );
     if ( deviceCount == 0 ) {
         puts( "Error: No Graphical Devices was found!" );
         return VK_ERROR_DEVICE_LOST;
     }
     VkPhysicalDevice devices[ deviceCount ];
-    vkEnumeratePhysicalDevices( HTA_vkInstance, &deviceCount, devices );
+    vkEnumeratePhysicalDevices( HTA.vkInstance, &deviceCount, devices );
     puts( "devices:" );
 
     bool isNotSupported = true;
     for ( int i = 0; i < deviceCount; i++ ) {
         bool isSupported = HTA_IsDeviceSuitable( devices[ i ] );
         if ( isSupported ) {
-            HTA_vkPhysicalDevice = devices[ i ];
+            HTA.vkPhysicalDevice = devices[ i ];
             isNotSupported = false;
         }
     }
@@ -152,7 +157,7 @@ VkResult HTA_PickPhysicalDevice() {
 VkResult HTA_CreateLogicalDevice() {
     debug_entry( "HTA_CreateLogicalDevice" );
 
-    QueueFamilyIndices indices = HTA_FindQueueFamilies( HTA_vkPhysicalDevice );
+    QueueFamilyIndices indices = HTA_FindQueueFamilies( HTA.vkPhysicalDevice );
     float queuePriority = 1.0f;
     VkDeviceQueueCreateInfo queueCreateInfo = {
         .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
@@ -177,10 +182,10 @@ VkResult HTA_CreateLogicalDevice() {
         .ppEnabledLayerNames = NULL
     };
 
-    VkResult result = vkCreateDevice( HTA_vkPhysicalDevice, &createInfo, NULL, &HTA_vkDevice );
+    VkResult result = vkCreateDevice( HTA.vkPhysicalDevice, &createInfo, NULL, &HTA.vkDevice );
     if ( result != VK_SUCCESS ) return result;
 
-    vkGetDeviceQueue( HTA_vkDevice, indices.graphicsFamily.value, 0, &HTA_graphicsQueue );
+    vkGetDeviceQueue( HTA.vkDevice, indices.graphicsFamily.value, 0, &HTA.graphicsQueue );
 
     return VK_SUCCESS;
 }
