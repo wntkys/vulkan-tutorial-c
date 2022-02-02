@@ -46,7 +46,7 @@ VkResult HTA_InitVulkan( void );
 VkResult HTA_CreateVulkanInstance( void );
 VkResult HTA_PickPhysicalDevice( void );
 VkResult HTA_CreateLogicalDevice( void );
-VkResult HTA_CreateSurface( void );
+//VkResult HTA_CreateSurface( void );
 
 void HTA_ClearFeatures( VkPhysicalDeviceFeatures* );
 void HTA_GetDriverVersion( char*, uint32_t, uint32_t );
