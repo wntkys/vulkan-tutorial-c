@@ -48,7 +48,8 @@ void HTA_MainLoop() {
 
 void HTA_Cleanup() {
     debug_entry( "HTA_Cleanup" );
-
+    vkDestroySurfaceKHR( HTA.vkInstance, HTA.vkSurface, NULL );
+    vkDestroyInstance( HTA.vkInstance, NULL );
     vkDestroyDevice( HTA.vkDevice, NULL );
     vkDestroyInstance( HTA.vkInstance, NULL );
     glfwDestroyWindow( HTA.window );
@@ -61,6 +62,12 @@ VkResult HTA_InitVulkan() {
     VkResult result = HTA_CreateVulkanInstance();
     if ( result != VK_SUCCESS ) {
         puts( "Error: failed to create vulkan instance!" );
+        return result;
+    }
+
+    result = HTA_CreateSurface();
+    if ( result != VK_SUCCESS ) {
+        puts( "Error: failed to create vulkan surface!" );
         return result;
     }
 
@@ -187,6 +194,15 @@ VkResult HTA_CreateLogicalDevice() {
 
     vkGetDeviceQueue( HTA.vkDevice, indices.graphicsFamily.value, 0, &HTA.graphicsQueue );
 
+    return VK_SUCCESS;
+}
+
+VkResult HTA_CreateSurface( void ) {
+    debug_entry( "HTA_CreateSurface" );
+
+    if ( glfwCreateWindowSurface( HTA.vkInstance, HTA.window, NULL, &HTA.vkSurface ) != VK_SUCCESS) {
+        return 1;
+    }
     return VK_SUCCESS;
 }
 

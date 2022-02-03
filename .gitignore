@@ -1,5 +1,9 @@
 .vscode/*.*
 .vscode/c_cpp_properties.json
 .vscode/settings.json
+.vscode
 bin/*.exe
 Makefile
+*.bat
+rules_of_unit.txt
+units.data

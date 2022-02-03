@@ -1,8 +1,6 @@
 #ifndef __HELLO_TRIANGLE_APPLICATION__
 #define __HELLO_TRIANGLE_APPLICATION__
 
-#define VK_USE_PLATFORM_WIN32_KHR
-#define GLFW_EXPOSE_NATIVE_WIN32
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -46,7 +44,7 @@ VkResult HTA_InitVulkan( void );
 VkResult HTA_CreateVulkanInstance( void );
 VkResult HTA_PickPhysicalDevice( void );
 VkResult HTA_CreateLogicalDevice( void );
-//VkResult HTA_CreateSurface( void );
+VkResult HTA_CreateSurface( void );
 
 void HTA_ClearFeatures( VkPhysicalDeviceFeatures* );
 void HTA_GetDriverVersion( char*, uint32_t, uint32_t );
